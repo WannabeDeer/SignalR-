@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SignalR 全配置客户端</title>
+    <script src="./signalr.js"></script>
+    <style>
+        :root {
+            --bg: #f0f2f5;
+            --card-bg: #ffffff;
+            --primary: #4f6ef7;
+            --primary-hover: #3b54e0;
+            --danger: #e05555;
+            --danger-hover: #c74444;
+            --success: #3cb878;
+            --warning: #f0a040;
+            --text: #2c3e50;
+            --text-secondary: #6b7280;
+            --border: #e0e4ea;
+            --shadow: 0 2px 12px rgba(0, 0, 0, 0.07);
+            --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.10);
+            --radius: 10px;
+            --radius-sm: 6px;
+            --transition: 0.2s ease;
+            --font-mono: 'SF Mono', 'Cascadia Code', 'Consolas', 'Monaco', monospace;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 24px 16px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 760px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .header {
+            text-align: center;
+            padding: 6px 0;
+        }
+        .header h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+            letter-spacing: -0.02em;
+        }
+        .header .subtitle {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 16px 18px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            transition: box-shadow var(--transition);
+        }
+        .card:hover {
+            box-shadow: var(--shadow-lg);
+        }
+        .card-title {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .card-title .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .dot.green { background: var(--success); }
+        .dot.red { background: var(--danger); }
+        .dot.orange { background: var(--warning); }
+        .dot.gray { background: #b0b8c1; }
+
+        .form-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .form-row input[type="text"] {
+            flex: 1;
+            min-width: 120px;
+            padding: 8px 12px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem;
+            font-family: var(--font-mono);
+            transition: border-color var(--transition), box-shadow var(--transition);
+            background: #fafbfc;
+            color: var(--text);
+        }
+        .form-row input[type="text"]:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 110, 247, 0.1);
+            background: #fff;
+        }
+        .form-row input[type="text"]::placeholder {
+            color: #c0c7cf;
+        }
+        .form-row label {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            padding: 8px 16px;
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all var(--transition);
+            white-space: nowrap;
+            letter-spacing: 0.01em;
+            user-select: none;
+        }
+        .btn:active { transform: scale(0.97); }
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+        }
+        .btn-primary:hover {
+            background: var(--primary-hover);
+            box-shadow: 0 4px 14px rgba(79, 110, 247, 0.35);
+        }
+        .btn-danger {
+            background: #fff;
+            color: var(--danger);
+            border: 1.5px solid var(--danger);
+        }
+        .btn-danger:hover {
+            background: var(--danger);
+            color: #fff;
+            box-shadow: 0 4px 14px rgba(224, 85, 85, 0.3);
+        }
+        .btn-outline {
+            background: #fff;
+            color: var(--primary);
+            border: 1.5px solid var(--primary);
+        }
+        .btn-outline:hover {
+            background: #f5f7ff;
+            box-shadow: 0 4px 14px rgba(79, 110, 247, 0.15);
+        }
+        .btn-sm { padding: 6px 12px; font-size: 0.78rem; }
+        .btn-xs { padding: 4px 8px; font-size: 0.7rem; border-radius: 4px; }
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid transparent;
+            padding: 5px 8px;
+            font-size: 0.75rem;
+        }
+        .btn-ghost:hover {
+            background: #f5f6f8;
+            border-color: var(--border);
+            color: var(--text);
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+        }
+        .status-badge.connected {
+            background: #eaf7ef;
+            color: #2d8a56;
+        }
+        .status-badge.disconnected {
+            background: #fef0f0;
+            color: #c0392b;
+        }
+        .status-badge.reconnecting {
+            background: #fef8ee;
+            color: #b87a14;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .message-list {
+            list-style: none;
+            max-height: 340px;
+            overflow-y: auto;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 8px 12px;
+            background: #fafbfc;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            line-height: 1.6;
+        }
+        .message-list li {
+            padding: 6px 8px;
+            margin: 3px 0;
+            border-radius: 6px;
+            background: #fff;
+            border-left: 3px solid transparent;
+            animation: fadeIn 0.25s ease;
+            word-break: break-all;
+        }
+        .message-list li.system {
+            border-left-color: #b0b8c1;
+            color: #8b929a;
+            background: #f9fafb;
+            font-size: 0.75rem;
+        }
+        .message-list li.incoming {
+            border-left-color: var(--primary);
+            color: var(--text);
+        }
+        .message-list li.outgoing {
+            border-left-color: var(--success);
+            color: #2d6a4f;
+            background: #f7fdf9;
+        }
+        .message-list li.error {
+            border-left-color: var(--danger);
+            color: #b53030;
+            background: #fff8f8;
+        }
+        .message-list .time-tag {
+            font-size: 0.65rem;
+            color: #a0a8b0;
+            margin-right: 6px;
+            font-weight: 500;
+        }
+        .message-empty {
+            text-align: center;
+            color: #c5cad2;
+            padding: 30px 0;
+            font-style: italic;
+            font-size: 0.85rem;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 600px) {
+            .form-row { flex-direction: column; gap: 6px; }
+            .form-row input[type="text"] { width: 100%; min-width: unset; }
+            .btn-group { flex-direction: column; width: 100%; }
+            .btn-group .btn { width: 100%; justify-content: center; }
+            .card { padding: 12px; }
+            .message-list { max-height: 200px; }
+        }
+
+        .card.config-card {
+            border-left: 4px solid var(--primary);
+            background: #fdfdff;
+        }
+        .hint {
+            font-size: 0.7rem;
+            color: #9aa0a8;
+            margin-top: 4px;
+        }
+        .hint code {
+            background: #f0f2f5;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        .config-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        .config-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .config-item label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .config-item input {
+            padding: 6px 10px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 0.8rem;
+            font-family: var(--font-mono);
+            background: #fafbfc;
+            transition: border-color var(--transition);
+        }
+        .config-item input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: #fff;
+        }
+        @media (max-width: 600px) {
+            .config-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 头部 -->
+        <div class="header">
+            <h2>🔧 SignalR 全配置客户端</h2>
+            <p class="subtitle">所有方法名、事件名均可自定义</p>
+        </div>
+
+        <!-- ========== 服务器地址 ========== -->
+        <div class="card config-card">
+            <div class="card-title"><span class="dot gray"></span> 服务器地址</div>
+            <div class="form-row">
+                <input type="text" id="serverUrlInput" placeholder="SignalR Hub URL" />
+                <div class="btn-group">
+                    <button class="btn btn-outline btn-sm" id="saveConfigBtn">💾 保存</button>
+                    <button class="btn btn-ghost btn-xs" id="resetConfigBtn">↻ 默认</button>
+                </div>
+            </div>
+            <div class="hint">默认：<code>http://XX.XX.XX.XX:9202/iot/area/hubs</code></div>
+        </div>
+
+        <!-- ========== 方法名 & 事件名 配置 ========== -->
+        <div class="card config-card">
+            <div class="card-title"><span class="dot gray"></span> 方法名 / 事件名（按服务器定义填写）</div>
+            <div class="config-grid">
+                <div class="config-item">
+                    <label>发送消息方法</label>
+                    <input type="text" id="sendMethodInput" value="SendMessage" />
+                </div>
+                <div class="config-item">
+                    <label>加入群组方法</label>
+                    <input type="text" id="joinMethodInput" value="AddToGroup" />
+                </div>
+                <div class="config-item">
+                    <label>离开群组方法</label>
+                    <input type="text" id="leaveMethodInput" value="LeaveGroup" />
+                </div>
+                <div class="config-item">
+                    <label>普通消息事件名</label>
+                    <input type="text" id="receiveEventInput" value="receive" />
+                </div>
+                <div class="config-item">
+                    <label>群组消息事件名</label>
+                    <input type="text" id="groupEventInput" value="ReceiveMessage" />
+                </div>
+            </div>
+            <div class="hint">💡 修改后自动保存，无需手动保存。</div>
+        </div>
+
+        <!-- ========== 连接管理 ========== -->
+        <div class="card">
+            <div class="card-title"><span class="dot gray" id="statusDot"></span> 连接管理</div>
+            <div class="form-row" style="align-items:center;">
+                <div class="btn-group">
+                    <button class="btn btn-primary" id="connectBtn">🔌 连接</button>
+                    <button class="btn btn-danger" id="disconnectBtn">⏹ 断开</button>
+                </div>
+                <span id="connectionStatus" class="status-badge disconnected">未连接</span>
+            </div>
+        </div>
+
+        <!-- ========== 群组操作 ========== -->
+        <div class="card">
+            <div class="card-title"><span class="dot gray"></span> 群组操作</div>
+            <div class="form-row">
+                <input type="text" id="groupNameInput" placeholder="群组名称" value="10.10.10.10" />
+                <div class="btn-group">
+                    <button class="btn btn-outline btn-sm" id="joinGroupBtn">📥 加入</button>
+                    <button class="btn btn-outline btn-sm" id="leaveGroupBtn">📤 离开</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== 发送消息 ========== -->
+        <div class="card">
+            <div class="card-title"><span class="dot gray"></span> 发送消息</div>
+            <div class="form-row">
+                <input type="text" id="messageInput" placeholder="输入消息，回车发送" />
+                <button class="btn btn-primary btn-sm" id="sendBtn">📨 发送</button>
+            </div>
+        </div>
+
+        <!-- ========== 消息显示 ========== -->
+        <div class="card">
+            <div class="card-title" style="justify-content:space-between;flex-wrap:wrap;">
+                <span>📋 消息日志</span>
+                <button class="btn btn-ghost btn-xs" id="clearMessagesBtn">🗑 清空</button>
+            </div>
+            <ul id="messagesList" class="message-list">
+                <li class="message-empty">暂无消息</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // ==================== DOM 引用 ====================
+            const serverUrlInput = document.getElementById('serverUrlInput');
+            const saveConfigBtn = document.getElementById('saveConfigBtn');
+            const resetConfigBtn = document.getElementById('resetConfigBtn');
+            const connectBtn = document.getElementById('connectBtn');
+            const disconnectBtn = document.getElementById('disconnectBtn');
+            const connectionStatus = document.getElementById('connectionStatus');
+            const statusDot = document.getElementById('statusDot');
+            const groupNameInput = document.getElementById('groupNameInput');
+            const joinGroupBtn = document.getElementById('joinGroupBtn');
+            const leaveGroupBtn = document.getElementById('leaveGroupBtn');
+            const messageInput = document.getElementById('messageInput');
+            const sendBtn = document.getElementById('sendBtn');
+            const messagesList = document.getElementById('messagesList');
+            const clearMessagesBtn = document.getElementById('clearMessagesBtn');
+
+            // 配置输入框
+            const sendMethodInput = document.getElementById('sendMethodInput');
+            const joinMethodInput = document.getElementById('joinMethodInput');
+            const leaveMethodInput = document.getElementById('leaveMethodInput');
+            const receiveEventInput = document.getElementById('receiveEventInput');
+            const groupEventInput = document.getElementById('groupEventInput');
+
+            // ==================== 常量 & 存储键 ====================
+            const DEFAULT_SERVER_URL = 'http://XX.XX.XX.XX:9202/iot/area/hubs';
+            const STORAGE_KEY = 'signalr_full_config';
+
+            // ==================== 状态 ====================
+            let connection = null;
+            let currentConnectionUrl = null;
+            let isConnecting = false;
+
+            // ==================== 配置管理 ====================
+            function getDefaultConfig() {
+                return {
+                    serverUrl: DEFAULT_SERVER_URL,
+                    sendMethod: 'SendMessage',
+                    joinMethod: 'AddToGroup',
+                    leaveMethod: 'LeaveGroup',
+                    receiveEvent: 'receive',
+                    groupEvent: 'ReceiveMessage'
+                };
+            }
+
+            function loadFullConfig() {
+                try {
+                    const saved = localStorage.getItem(STORAGE_KEY);
+                    if (saved) {
+                        const parsed = JSON.parse(saved);
+                        // 合并默认值，保证字段完整
+                        const def = getDefaultConfig();
+                        for (let key in def) {
+                            if (!(key in parsed)) parsed[key] = def[key];
+                        }
+                        return parsed;
+                    }
+                } catch (e) { /* ignore */ }
+                return getDefaultConfig();
+            }
+
+            function saveFullConfig(cfg) {
+                try {
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(cfg));
+                    return true;
+                } catch (e) { return false; }
+            }
+
+            // 从UI读取当前配置
+            function getCurrentConfig() {
+                return {
+                    serverUrl: serverUrlInput.value.trim() || DEFAULT_SERVER_URL,
+                    sendMethod: sendMethodInput.value.trim() || 'SendMessage',
+                    joinMethod: joinMethodInput.value.trim() || 'AddToGroup',
+                    leaveMethod: leaveMethodInput.value.trim() || 'LeaveGroup',
+                    receiveEvent: receiveEventInput.value.trim() || 'receive',
+                    groupEvent: groupEventInput.value.trim() || 'ReceiveMessage'
+                };
+            }
+
+            // 将配置写入UI
+            function applyConfig(cfg) {
+                serverUrlInput.value = cfg.serverUrl;
+                sendMethodInput.value = cfg.sendMethod;
+                joinMethodInput.value = cfg.joinMethod;
+                leaveMethodInput.value = cfg.leaveMethod;
+                receiveEventInput.value = cfg.receiveEvent;
+                groupEventInput.value = cfg.groupEvent;
+            }
+
+            // 初始化加载配置
+            const initialConfig = loadFullConfig();
+            applyConfig(initialConfig);
+
+            // 监听配置输入变化自动保存
+            const configInputs = [serverUrlInput, sendMethodInput, joinMethodInput, leaveMethodInput, receiveEventInput, groupEventInput];
+            configInputs.forEach(inp => {
+                inp.addEventListener('change', () => {
+                    const cfg = getCurrentConfig();
+                    saveFullConfig(cfg);
+                });
+                inp.addEventListener('input', () => {
+                    // 实时保存，但节流
+                    clearTimeout(inp._saveTimer);
+                    inp._saveTimer = setTimeout(() => {
+                        const cfg = getCurrentConfig();
+                        saveFullConfig(cfg);
+                    }, 500);
+                });
+            });
+
+            // ==================== UI 状态更新 ====================
+            function updateConnectionUI(state) {
+                connectionStatus.classList.remove('connected', 'disconnected', 'reconnecting');
+                statusDot.classList.remove('green', 'red', 'orange', 'gray');
+
+                switch (state) {
+                    case 'connected':
+                        connectionStatus.textContent = '✅ 已连接';
+                        connectionStatus.classList.add('connected');
+                        statusDot.classList.add('green');
+                        connectBtn.disabled = true;
+                        disconnectBtn.disabled = false;
+                        break;
+                    case 'disconnected':
+                        connectionStatus.textContent = '⛔ 未连接';
+                        connectionStatus.classList.add('disconnected');
+                        statusDot.classList.add('red');
+                        connectBtn.disabled = false;
+                        disconnectBtn.disabled = true;
+                        break;
+                    case 'reconnecting':
+                        connectionStatus.textContent = '🔄 重连中...';
+                        connectionStatus.classList.add('reconnecting');
+                        statusDot.classList.add('orange');
+                        connectBtn.disabled = true;
+                        disconnectBtn.disabled = false;
+                        break;
+                    case 'connecting':
+                        connectionStatus.textContent = '⏳ 连接中...';
+                        connectionStatus.classList.add('reconnecting');
+                        statusDot.classList.add('orange');
+                        connectBtn.disabled = true;
+                        disconnectBtn.disabled = true;
+                        break;
+                    default:
+                        connectionStatus.textContent = '⛔ 未连接';
+                        connectionStatus.classList.add('disconnected');
+                        statusDot.classList.add('gray');
+                        connectBtn.disabled = false;
+                        disconnectBtn.disabled = true;
+                }
+            }
+
+            // ==================== 消息日志 ====================
+            function addMessageToDisplay(message, type = 'incoming') {
+                const emptyMsg = messagesList.querySelector('.message-empty');
+                if (emptyMsg) emptyMsg.remove();
+
+                const li = document.createElement('li');
+                const timeStr = new Date().toLocaleTimeString('zh-CN', { hour12: false });
+
+                let cssClass = 'incoming';
+                if (type === 'system') cssClass = 'system';
+                else if (type === 'outgoing') cssClass = 'outgoing';
+                else if (type === 'error') cssClass = 'error';
+                else if (type === 'incoming') cssClass = 'incoming';
+
+                li.classList.add(cssClass);
+                li.innerHTML = `<span class="time-tag">${timeStr}</span>${escapeHtml(String(message))}`;
+                messagesList.appendChild(li);
+                messagesList.scrollTop = messagesList.scrollHeight;
+
+                // 限制数量
+                const maxMessages = 200;
+                while (messagesList.children.length > maxMessages) {
+                    const first = messagesList.firstElementChild;
+                    if (first && !first.classList.contains('message-empty')) first.remove();
+                    else break;
+                }
+            }
+
+            function escapeHtml(str) {
+                const div = document.createElement('div');
+                div.textContent = str;
+                return div.innerHTML;
+            }
+
+            function clearMessages() {
+                messagesList.innerHTML = '<li class="message-empty">暂无消息</li>';
+            }
+
+            // ==================== 连接管理 ====================
+            function createConnection(url) {
+                const cfg = getCurrentConfig();
+                const conn = new signalR.HubConnectionBuilder()
+                    .withUrl(url)
+                    .withAutomaticReconnect([0, 2000, 5000, 10000, 30000])
+                    .build();
+
+                conn.onclose((error) => {
+                    console.log('连接关闭', error);
+                    updateConnectionUI('disconnected');
+                    addMessageToDisplay(`连接关闭: ${error?.message || '正常' }`, 'system');
+                    if (connection === conn) currentConnectionUrl = null;
+                });
+
+                conn.onreconnecting((error) => {
+                    console.log('重连中...', error);
+                    updateConnectionUI('reconnecting');
+                    addMessageToDisplay(`重连中... ${error?.message || ''}`, 'system');
+                });
+
+                conn.onreconnected((connectionId) => {
+                    console.log('重连成功', connectionId);
+                    updateConnectionUI('connected');
+                    addMessageToDisplay(`✅ 重连成功 (ID: ${connectionId || 'N/A'})`, 'system');
+                });
+
+                // 使用配置的事件名绑定
+                const receiveEvent = cfg.receiveEvent;
+                const groupEvent = cfg.groupEvent;
+
+                if (receiveEvent) {
+                    conn.on(receiveEvent, (data) => {
+                        console.log(`收到事件 [${receiveEvent}]:`, data);
+                        const displayData = typeof data === 'object' ? JSON.stringify(data, null, 2) : String(data);
+                        addMessageToDisplay(`📩 [${receiveEvent}] ${displayData}`, 'incoming');
+                    });
+                }
+
+                if (groupEvent) {
+                    conn.on(groupEvent, (message) => {
+                        console.log(`收到事件 [${groupEvent}]:`, message);
+                        const groupLabel = groupNameInput.value.trim() || '未知群组';
+                        const displayMsg = typeof message === 'object' ? JSON.stringify(message, null, 2) : String(message);
+                        addMessageToDisplay(`📬 [${groupLabel}] ${displayMsg}`, 'incoming');
+                    });
+                }
+
+                return conn;
+            }
+
+            async function disconnectExisting() {
+                if (connection) {
+                    const c = connection;
+                    connection = null;
+                    currentConnectionUrl = null;
+                    try {
+                        if (c.state !== signalR.HubConnectionState.Disconnected) {
+                            await c.stop();
+                        }
+                    } catch (err) { /* ignore */ }
+                }
+            }
+
+            async function connectToServer() {
+                if (isConnecting) {
+                    addMessageToDisplay('⚠ 正在连接中...', 'system');
+                    return;
+                }
+
+                const cfg = getCurrentConfig();
+                const url = cfg.serverUrl;
+                if (!url) {
+                    addMessageToDisplay('❌ 请输入服务器地址', 'error');
+                    return;
+                }
+                if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                    addMessageToDisplay('❌ URL 需以 http:// 或 https:// 开头', 'error');
+                    return;
+                }
+
+                if (connection && currentConnectionUrl !== url) {
+                    await disconnectExisting();
+                }
+
+                if (connection && connection.state === signalR.HubConnectionState.Connected) {
+                    addMessageToDisplay('ℹ 已连接', 'system');
+                    return;
+                }
+
+                if (!connection) {
+                    connection = createConnection(url);
+                    currentConnectionUrl = url;
+                }
+
+                isConnecting = true;
+                updateConnectionUI('connecting');
+                addMessageToDisplay(`🔗 连接至 ${url} ...`, 'system');
+
+                try {
+                    await connection.start();
+                    updateConnectionUI('connected');
+                    addMessageToDisplay(`✅ 连接成功 (方法: 发送=${cfg.sendMethod}, 加入=${cfg.joinMethod}, 离开=${cfg.leaveMethod})`, 'system');
+                    currentConnectionUrl = url;
+                } catch (err) {
+                    console.error('连接失败:', err);
+                    updateConnectionUI('disconnected');
+                    addMessageToDisplay(`❌ 连接失败: ${err.message || err}`, 'error');
+                    connection = null;
+                    currentConnectionUrl = null;
+                } finally {
+                    isConnecting = false;
+                }
+            }
+
+            async function disconnectFromServer() {
+                if (connection && connection.state !== signalR.HubConnectionState.Disconnected) {
+                    try {
+                        addMessageToDisplay('⏹ 断开连接...', 'system');
+                        await connection.stop();
+                        updateConnectionUI('disconnected');
+                        addMessageToDisplay('⏹ 已断开', 'system');
+                    } catch (err) {
+                        addMessageToDisplay(`⚠ 断开出错: ${err.message}`, 'error');
+                    }
+                } else {
+                    updateConnectionUI('disconnected');
+                    addMessageToDisplay('ℹ 未连接', 'system');
+                }
+                connection = null;
+                currentConnectionUrl = null;
+            }
+
+            // ==================== 群组操作（使用配置） ====================
+            async function joinGroup() {
+                const group = groupNameInput.value.trim();
+                if (!group) { addMessageToDisplay('⚠ 输入群组名', 'system'); return; }
+                if (!connection || connection.state !== signalR.HubConnectionState.Connected) {
+                    addMessageToDisplay('⚠ 未连接', 'system');
+                    return;
+                }
+                const method = joinMethodInput.value.trim() || 'AddToGroup';
+                try {
+                    await connection.invoke(method, group);
+                    addMessageToDisplay(`📥 加入群组 [${group}] (方法: ${method})`, 'system');
+                } catch (err) {
+                    addMessageToDisplay(`❌ 加入失败: ${err.message}`, 'error');
+                }
+            }
+
+            async function leaveGroup() {
+                const group = groupNameInput.value.trim();
+                if (!group) { addMessageToDisplay('⚠ 输入群组名', 'system'); return; }
+                if (!connection || connection.state !== signalR.HubConnectionState.Connected) {
+                    addMessageToDisplay('⚠ 未连接', 'system');
+                    return;
+                }
+                const method = leaveMethodInput.value.trim() || 'LeaveGroup';
+                try {
+                    await connection.invoke(method, group);
+                    addMessageToDisplay(`📤 离开群组 [${group}] (方法: ${method})`, 'system');
+                } catch (err) {
+                    addMessageToDisplay(`❌ 离开失败: ${err.message}`, 'error');
+                }
+            }
+
+            // ==================== 发送消息（使用配置） ====================
+            async function sendMessage() {
+                const msg = messageInput.value.trim();
+                if (!msg) { addMessageToDisplay('⚠ 输入消息', 'system'); return; }
+                if (!connection || connection.state !== signalR.HubConnectionState.Connected) {
+                    addMessageToDisplay('⚠ 未连接', 'system');
+                    return;
+                }
+                const group = groupNameInput.value.trim();
+                if (!group) { addMessageToDisplay('⚠ 输入目标群组', 'system'); return; }
+                const method = sendMethodInput.value.trim() || 'SendMessage';
+                try {
+                    await connection.invoke(method, group, msg);
+                    addMessageToDisplay(`📨 [→ ${group}] ${msg} (方法: ${method})`, 'outgoing');
+                    messageInput.value = '';
+                    messageInput.focus();
+                } catch (err) {
+                    addMessageToDisplay(`❌ 发送失败: ${err.message}`, 'error');
+                }
+            }
+
+            // ==================== 事件绑定 ====================
+            connectBtn.addEventListener('click', connectToServer);
+            disconnectBtn.addEventListener('click', disconnectFromServer);
+            joinGroupBtn.addEventListener('click', joinGroup);
+            leaveGroupBtn.addEventListener('click', leaveGroup);
+            sendBtn.addEventListener('click', sendMessage);
+
+            saveConfigBtn.addEventListener('click', () => {
+                const cfg = getCurrentConfig();
+                if (!cfg.serverUrl) {
+                    addMessageToDisplay('⚠ 输入有效地址', 'system');
+                    return;
+                }
+                if (saveFullConfig(cfg)) {
+                    addMessageToDisplay(`💾 配置已保存`, 'system');
+                    saveConfigBtn.style.background = '#eaf7ef';
+                    saveConfigBtn.style.borderColor = '#3cb878';
+                    setTimeout(() => { saveConfigBtn.style.background = ''; saveConfigBtn.style.borderColor = ''; }, 800);
+                } else {
+                    addMessageToDisplay('❌ 保存失败', 'error');
+                }
+            });
+
+            resetConfigBtn.addEventListener('click', () => {
+                const def = getDefaultConfig();
+                applyConfig(def);
+                saveFullConfig(def);
+                addMessageToDisplay(`↻ 已恢复默认配置`, 'system');
+            });
+
+            clearMessagesBtn.addEventListener('click', () => {
+                clearMessages();
+                addMessageToDisplay('🗑 清空日志', 'system');
+            });
+
+            messageInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') { e.preventDefault(); sendMessage(); }
+            });
+            groupNameInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') { e.preventDefault(); joinGroup(); }
+            });
+
+            window.addEventListener('beforeunload', () => {
+                if (connection && connection.state !== signalR.HubConnectionState.Disconnected) {
+                    connection.stop().catch(() => {});
+                }
+            });
+
+            // ==================== 初始化 ====================
+            function init() {
+                updateConnectionUI('disconnected');
+                disconnectBtn.disabled = true;
+                console.log('SignalR 全配置客户端已启动');
+                const cfg = getCurrentConfig();
+                addMessageToDisplay('🚀 客户端就绪', 'system');
+                addMessageToDisplay(`📍 服务器: ${cfg.serverUrl}`, 'system');
+                addMessageToDisplay(`🔧 发送方法: ${cfg.sendMethod} | 加入: ${cfg.joinMethod} | 离开: ${cfg.leaveMethod}`, 'system');
+                addMessageToDisplay(`📡 事件: 普通=${cfg.receiveEvent}, 群组=${cfg.groupEvent}`, 'system');
+            }
+
+            init();
+        })();
+    </script>
+</body>
+</html>
